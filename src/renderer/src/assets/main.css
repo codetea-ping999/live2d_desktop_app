@@ -1,0 +1,246 @@
+/* Live2D Desktop App - Global Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Main app container — draggable window region */
+.app-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: transparent;
+  -webkit-app-region: drag;
+}
+
+/* Canvas container */
+.live2d-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#live2d-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  -webkit-app-region: no-drag;
+  cursor: default;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error overlay */
+.error-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #ff6b6b;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 20px 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  max-width: 320px;
+  -webkit-app-region: no-drag;
+}
+
+.error-hint {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* ========== Control Overlay ========== */
+.control-overlay {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 1000;
+  -webkit-app-region: no-drag;
+}
+
+.control-toggle {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.3;
+}
+
+.control-overlay:hover .control-toggle {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.control-panel {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: rgba(20, 20, 30, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: slideIn 0.15s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.control-group {
+  margin-bottom: 12px;
+}
+
+.control-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.control-label {
+  min-width: 48px;
+}
+
+.control-value {
+  min-width: 36px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+/* Range slider styling */
+input[type='range'] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #7c6ef0;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.15s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  background: #9b8dfa;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.control-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.control-btn.active {
+  background: rgba(124, 110, 240, 0.3);
+  color: #b2a5ff;
+}
+
+.close-btn:hover {
+  background: rgba(255, 80, 80, 0.3);
+  color: #ff8080;
+}
