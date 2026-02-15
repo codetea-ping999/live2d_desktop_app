@@ -1,6 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain, Menu, Tray, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu, Tray, nativeImage, clipboard } from 'electron'
 import { join } from 'path'
+import { exec } from 'child_process'
+import { readFile, writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+const SETTINGS_FILENAME = 'settings.json'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
@@ -104,9 +109,60 @@ function setupIPC(): void {
     mainWindow?.setIgnoreMouseEvents(ignore, { forward: true })
   })
 
-  // Window drag support via IPC
-  ipcMain.on('window:start-drag', () => {
-    // No-op: drag is handled via CSS -webkit-app-region: drag
+  // ドラッグによるウィンドウ移動（設計書: window:move R->M）
+  ipcMain.on('window:move', (_event, x: number, y: number) => {
+    if (typeof x === 'number' && typeof y === 'number') {
+      mainWindow?.setPosition(Math.round(x), Math.round(y))
+    }
+  })
+
+  // SettingsStore: settings.json の読み書き（メインプロセスで実行）
+  ipcMain.handle('settings:get', async () => {
+    const userData = app.getPath('userData')
+    const path = join(userData, SETTINGS_FILENAME)
+    if (!existsSync(path)) return null
+    try {
+      const raw = await readFile(path, 'utf-8')
+      return JSON.parse(raw) as Record<string, unknown>
+    } catch {
+      return null
+    }
+  })
+
+  ipcMain.handle('settings:set', async (_event, data: Record<string, unknown>) => {
+    const userData = app.getPath('userData')
+    if (!existsSync(userData)) await mkdir(userData, { recursive: true })
+    const path = join(userData, SETTINGS_FILENAME)
+    await writeFile(path, JSON.stringify(data, null, 2), 'utf-8')
+  })
+
+  // Shortcuts: copy text to clipboard (main process for reliability)
+  ipcMain.handle('shortcuts:copy-to-clipboard', (_event, text: string) => {
+    if (typeof text === 'string') {
+      clipboard.writeText(text)
+    }
+  })
+
+  // Shortcuts: launch app (macOS: open -a "AppName")
+  ipcMain.handle('shortcuts:launch-app', (_event, appNameOrPath: string) => {
+    return new Promise<void>((resolve, reject) => {
+      if (typeof appNameOrPath !== 'string' || !appNameOrPath.trim()) {
+        reject(new Error('App name or path is required'))
+        return
+      }
+      const name = appNameOrPath.trim()
+      if (process.platform === 'darwin') {
+        exec(`open -a "${name.replace(/"/g, '\\"')}"`, (err) => {
+          if (err) reject(err)
+          else resolve()
+        })
+      } else {
+        shell.openPath(name).then((errMsg) => {
+          if (errMsg) reject(new Error(errMsg))
+          else resolve()
+        })
+      }
+    })
   })
 }
 

@@ -6,6 +6,7 @@
   "author": "",
   "homepage": "",
   "scripts": {
+    "copy-sdk": "node scripts/copy-cubism-core.js",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",

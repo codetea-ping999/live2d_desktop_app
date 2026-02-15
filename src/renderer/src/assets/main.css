@@ -102,6 +102,13 @@ body {
   line-height: 1.6;
 }
 
+.error-hint code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
 /* ========== Control Overlay ========== */
 .control-overlay {
   position: fixed;
@@ -140,10 +147,127 @@ body {
   backdrop-filter: blur(20px);
   border-radius: 12px;
   padding: 16px;
-  min-width: 220px;
+  min-width: 240px;
+  max-width: 280px;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   animation: slideIn 0.15s ease-out;
+}
+
+.control-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.control-tab {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.control-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.control-tab.active {
+  background: rgba(124, 110, 240, 0.35);
+  color: #b2a5ff;
+}
+
+/* Shortcuts section */
+.shortcuts-section {
+  padding-top: 4px;
+}
+
+.shortcuts-block {
+  margin-bottom: 14px;
+}
+
+.shortcuts-block:last-child {
+  margin-bottom: 0;
+}
+
+.shortcuts-block-title {
+  display: block;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.shortcuts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shortcuts-grid.templates .shortcut-btn {
+  flex: 1 1 100%;
+}
+
+.shortcut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.shortcut-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.shortcut-btn.app-btn {
+  flex: 0 0 auto;
+}
+
+.shortcut-btn .shortcut-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.shortcut-btn .shortcut-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+}
+
+.shortcut-copied {
+  position: absolute;
+  right: 6px;
+  font-size: 9px;
+  color: #6ee7b7;
+}
+
+.shortcuts-error {
+  font-size: 10px;
+  color: #f87171;
+  margin-top: 6px;
 }
 
 @keyframes slideIn {
