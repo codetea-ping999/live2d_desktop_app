@@ -2,10 +2,8 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import * as PIXI from 'pixi.js'
 
 // Import pixi-live2d-display for both Cubism 2 and 4
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { Live2DModel } = require('pixi-live2d-display/cubism4');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-require('pixi-live2d-display/cubism2'); // Register Cubism 2 support
+import { Live2DModel } from 'pixi-live2d-display/cubism4'
+import 'pixi-live2d-display/cubism2' // Register Cubism 2 support
 
 // Register PixiJS ticker for Live2D animation updates
 Live2DModel.registerTicker(PIXI.Ticker)
