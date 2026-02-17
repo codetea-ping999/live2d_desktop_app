@@ -12,7 +12,7 @@ export interface IAvatarAdapter {
   /** 指定座標がキャラクター上かどうか判定する */
   hitTest(x: number, y: number): boolean
   /** 指定 ID のモーションを再生する */
-  playMotion(motionId: string): void
+  playMotion(motionId: string): void | Promise<void>
   /** 破棄・アンロード */
   destroy(): void
 }

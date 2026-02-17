@@ -11,6 +11,14 @@
 <body>
   <!-- Cubism SDK Core（public/lib/ に配置） -->
   <script src="/lib/live2dcubismcore.min.js"></script>
+  <script>
+    // Cubism Core のロード確認
+    if (typeof window.Live2DCubismCore !== 'undefined') {
+      console.log('[Live2D] Cubism Core loaded successfully');
+    } else {
+      console.warn('[Live2D] Cubism Core not found - check live2dcubismcore.min.js');
+    }
+  </script>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

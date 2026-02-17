@@ -10,6 +10,11 @@ interface Live2DAPI {
   setSettings: (data: Record<string, unknown>) => Promise<void>
   copyToClipboard: (text: string) => Promise<void>
   launchApp: (appNameOrPath: string) => Promise<void>
+  listModels: () => Promise<string[]>
+  setModel: (modelId: string) => Promise<boolean>
+  listMotions: (modelId: string) => Promise<string[]>
+  playMotion: (motionId: string) => Promise<void>
+  onModelChanged?: (cb: (modelId: string) => void) => () => void
 }
 
 declare global {

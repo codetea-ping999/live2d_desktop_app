@@ -100,6 +100,21 @@ body {
   font-size: 11px;
   margin-top: 8px;
   line-height: 1.6;
+  text-align: left;
+}
+
+.error-details {
+  color: #ffb3b3;
+  font-size: 12px;
+  margin: 8px 0;
+  font-weight: 500;
+  word-break: break-word;
+  max-height: 100px;
+  overflow-y: auto;
+  background: rgba(255, 50, 50, 0.1);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid #ff6b6b;
 }
 
 .error-hint code {
@@ -109,12 +124,57 @@ body {
   font-size: 10px;
 }
 
+/* Error container (inline error display) */
+.error-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  padding: 20px 24px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  max-width: 320px;
+  -webkit-app-region: no-drag;
+}
+
+.error-message {
+  color: #ff5252;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 /* ========== Control Overlay ========== */
 .control-overlay {
   position: fixed;
   top: 8px;
   right: 8px;
   z-index: 1000;
+  -webkit-app-region: no-drag;
+}
+
+.control-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 999;
+  -webkit-app-region: no-drag;
+}
+
+.control-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 999;
   -webkit-app-region: no-drag;
 }
 
@@ -132,11 +192,17 @@ body {
   justify-content: center;
   transition: all 0.2s ease;
   opacity: 0.3;
+  padding: 0;
 }
 
 .control-overlay:hover .control-toggle {
   opacity: 1;
   background: rgba(0, 0, 0, 0.6);
+}
+
+.control-overlay.expanded .control-toggle {
+  opacity: 1;
+  background: rgba(124, 110, 240, 0.5);
 }
 
 .control-panel {
@@ -154,6 +220,7 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   animation: slideIn 0.15s ease-out;
+  pointer-events: auto;
 }
 
 .control-tabs {
@@ -190,6 +257,12 @@ body {
 /* Shortcuts section */
 .shortcuts-section {
   padding-top: 4px;
+}
+
+.shortcuts-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .shortcuts-block {
@@ -268,6 +341,51 @@ body {
   font-size: 10px;
   color: #f87171;
   margin-top: 6px;
+}
+
+.shortcuts-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.shortcuts-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 56px auto;
+  gap: 6px;
+}
+
+.shortcuts-edit-row input {
+  min-width: 0;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 0 8px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.07);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+}
+
+.shortcuts-edit-row input:focus {
+  outline: none;
+  border-color: rgba(124, 110, 240, 0.8);
+}
+
+.shortcut-remove-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0 8px;
+  height: 28px;
+  background: rgba(248, 113, 113, 0.2);
+  color: #fecaca;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.shortcut-remove-btn:hover {
+  background: rgba(248, 113, 113, 0.3);
 }
 
 @keyframes slideIn {
@@ -367,4 +485,82 @@ input[type='range']::-webkit-slider-thumb:hover {
 .close-btn:hover {
   background: rgba(255, 80, 80, 0.3);
   color: #ff8080;
+}
+
+.close-panel-btn {
+  background: rgba(255, 165, 0, 0.2);
+  color: #ffa500;
+}
+
+.close-panel-btn:hover {
+  background: rgba(255, 165, 0, 0.3);
+  color: #ffb84d;
+}
+/* Models section */
+.models-section {
+  padding-top: 4px;
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.model-btn {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.model-btn.active {
+  background: rgba(124, 110, 240, 0.35);
+  color: #b2a5ff;
+  border: 1px solid rgba(124, 110, 240, 0.5);
+}
+/* Motions section */
+.motions-section {
+  padding-top: 4px;
+}
+
+.motions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.motion-btn {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.motion-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
 }
