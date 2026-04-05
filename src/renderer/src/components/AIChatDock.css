@@ -1,0 +1,254 @@
+.ai-dock {
+  position: fixed;
+  left: 16px;
+  bottom: 18px;
+  width: min(420px, calc(100vw - 28px));
+  padding: 12px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(100, 181, 246, 0.18), transparent 42%),
+    rgba(8, 12, 18, 0.86);
+  border: 1px solid rgba(175, 226, 255, 0.12);
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(22px);
+  z-index: 981;
+  -webkit-app-region: no-drag;
+}
+
+.ai-dock.compact,
+.ai-dock.hidden {
+  width: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.ai-dock.compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-dock-handle,
+.ai-dock-mini-toggle,
+.ai-dock-peek {
+  border: none;
+  border-radius: 999px;
+  background: rgba(10, 18, 30, 0.84);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+}
+
+.ai-dock-handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.ai-dock-handle strong {
+  font-size: 13px;
+}
+
+.ai-dock-handle span,
+.ai-dock-peek span,
+.ai-dock-mini-toggle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.ai-dock-mini-toggle,
+.ai-dock-peek {
+  height: 42px;
+  padding: 0 14px;
+}
+
+.ai-dock-peek {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-dock-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.ai-dock-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f5fbff;
+}
+
+.ai-dock-subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+  color: rgba(220, 239, 255, 0.66);
+}
+
+.ai-dock-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-dock-header-button,
+.ai-dock-close {
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+}
+
+.ai-dock-header-button {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 11px;
+}
+
+.ai-dock-close {
+  width: 34px;
+  height: 34px;
+}
+
+.ai-dock-log {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.ai-dock-empty,
+.ai-dock-thinking {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ai-bubble {
+  display: grid;
+  gap: 6px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-bubble.user {
+  background: rgba(87, 167, 255, 0.18);
+}
+
+.ai-bubble.assistant {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-bubble.system {
+  background: rgba(255, 205, 96, 0.12);
+}
+
+.ai-bubble-role {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.ai-bubble-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ai-dock-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ai-dock-textarea {
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  font: inherit;
+}
+
+.ai-dock-textarea:focus {
+  outline: none;
+  border-color: rgba(125, 211, 252, 0.8);
+}
+
+.ai-dock-button-row,
+.ai-dock-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-dock-button {
+  height: 38px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 14px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ai-dock-button.primary {
+  background: linear-gradient(135deg, rgba(93, 196, 255, 0.42), rgba(59, 130, 246, 0.28));
+  color: #eff8ff;
+}
+
+.ai-dock-button:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.ai-chip {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ai-dock-error {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 112, 112, 0.12);
+  border: 1px solid rgba(255, 112, 112, 0.24);
+  color: #ffd4d4;
+  font-size: 12px;
+}
+
+.ai-dock-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+@media (max-width: 880px) {
+  .ai-dock {
+    right: 16px;
+    width: auto;
+  }
+}
