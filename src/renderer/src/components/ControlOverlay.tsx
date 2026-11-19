@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AppStateView } from '../../../shared/ipc'
+import type { ModelSummary } from '../../../shared/models'
 import { OPACITY_RANGE, SCALE_RANGE } from '../../../shared/settings'
 
 interface ControlOverlayProps {
@@ -8,6 +9,13 @@ interface ControlOverlayProps {
   opacity: number
   onScaleChange: (scale: number) => void
   onOpacityChange: (opacity: number) => void
+  models: ModelSummary[]
+  selectedModelId: string | null
+  onSelectModel: (id: string) => void
+  onImportModel: () => void
+  importing: boolean
+  /** Last import / load error to show the user. */
+  notice: string | null
 }
 
 function formatShortcut(accelerator: string | null): string | null {
@@ -25,7 +33,13 @@ function ControlOverlay({
   scale,
   opacity,
   onScaleChange,
-  onOpacityChange
+  onOpacityChange,
+  models,
+  selectedModelId,
+  onSelectModel,
+  onImportModel,
+  importing,
+  notice
 }: ControlOverlayProps): React.JSX.Element {
   const [isExpanded, setIsExpanded] = useState(false)
   const shortcut = formatShortcut(state.clickThroughShortcut)
@@ -53,6 +67,34 @@ function ControlOverlay({
 
       {isExpanded && (
         <div className="control-panel">
+          <div className="control-group">
+            <label>
+              <span className="control-label">Model</span>
+              <select
+                className="control-select"
+                value={selectedModelId ?? ''}
+                disabled={models.length === 0}
+                onChange={(e) => onSelectModel(e.target.value)}
+              >
+                {models.length === 0 && <option value="">No models</option>}
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                    {m.source === 'bundled' ? ' (bundled)' : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="control-btn import-btn"
+              onClick={onImportModel}
+              disabled={importing}
+              title="Import a Live2D model folder"
+            >
+              {importing ? 'Importing…' : '＋ Import'}
+            </button>
+          </div>
+
           <div className="control-group">
             <label>
               <span className="control-label">Scale</span>
@@ -108,6 +150,11 @@ function ControlOverlay({
               ✕ Close
             </button>
           </div>
+          {notice && (
+            <p className="control-notice" role="alert">
+              ⚠️ {notice}
+            </p>
+          )}
           {state.clickThrough && (
             <p className="control-hint">
               Clicks pass through the character.

@@ -1,3 +1,5 @@
+import type { ImportResult, ModelListResult } from './models'
+
 /**
  * The complete list of IPC channels between renderer and main.
  * Anything not listed here is not part of the app's API.
@@ -11,7 +13,10 @@ export const IPC = {
   setClickThrough: 'window:set-click-through',
   /** Temporarily accept the mouse while hovering the controls in click-through mode. */
   setPointerOverControls: 'window:set-pointer-over-controls',
-  drag: 'window:drag'
+  drag: 'window:drag',
+  listModels: 'models:list',
+  selectModel: 'models:select',
+  importModel: 'models:import'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]
@@ -45,4 +50,8 @@ export interface Live2DAPI {
   updateCharacter(patch: { scale?: number; opacity?: number }): void
   drag(message: DragMessage): void
   quit(): void
+  listModels(): Promise<ModelListResult>
+  selectModel(id: string): Promise<ModelListResult>
+  /** Opens a folder / file picker in main; nothing is read in the renderer. */
+  importModel(): Promise<ImportResult>
 }

@@ -1,3 +1,5 @@
+import { MODEL_ID_PATTERN } from './models'
+
 /**
  * Persisted settings schema, shared by main and renderer so defaults and
  * ranges live in exactly one place (#4, #5, #6, #7).
@@ -78,8 +80,6 @@ export function normalizeBounds(value: unknown): WindowBounds | null {
     height: Math.round(height as number)
   }
 }
-
-const MODEL_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,127}$/i
 
 export function normalizeModelId(value: unknown): string | null {
   return typeof value === 'string' && MODEL_ID_PATTERN.test(value) ? value : null
