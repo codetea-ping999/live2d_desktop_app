@@ -28,7 +28,6 @@ body {
   height: 100%;
   position: relative;
   background: transparent;
-  -webkit-app-region: drag;
 }
 
 /* Canvas container */
@@ -44,8 +43,13 @@ body {
   display: block;
   width: 100%;
   height: 100%;
-  -webkit-app-region: no-drag;
   cursor: default;
+}
+
+/* Window drag in progress (drag is handled in JS, not -webkit-app-region) */
+.live2d-container.dragging,
+.live2d-container.dragging .live2d-canvas {
+  cursor: grabbing;
 }
 
 /* Loading overlay */
@@ -270,4 +274,11 @@ input[type='range']::-webkit-slider-thumb:hover {
   font-size: 12px;
   pointer-events: none;
   -webkit-app-region: no-drag;
+}
+
+.control-hint {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
 }
