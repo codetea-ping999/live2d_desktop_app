@@ -8,13 +8,13 @@ function App(): React.JSX.Element {
   const [opacity, setOpacity] = useState(1.0)
 
   // Default model path - Hatsune Miku
-  const modelPath =
+  const modelUrl =
     'https://cdn.jsdelivr.net/gh/evrstr/live2d-widget-models/live2d_evrstr/miku/model.json'
 
   return (
     <ErrorBoundary>
       <div className="app-container">
-        <Live2DViewer modelPath={modelPath} scale={scale} opacity={opacity} />
+        <Live2DViewer modelUrl={modelUrl} scale={scale} opacity={opacity} />
         <ControlOverlay
           scale={scale}
           opacity={opacity}
