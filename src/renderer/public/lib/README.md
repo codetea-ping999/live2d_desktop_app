@@ -1,12 +1,13 @@
-# Missing Live2D Cubism Core
+# Live2D runtimes (not included)
 
-The `live2dcubismcore.min.js` file is required for the application to work but cannot be included in this repository due to licensing restrictions.
+The Live2D runtime scripts cannot be redistributed in this repository, so place them here yourself.
+Each one enables one model format; you only need the one(s) for the models you use.
 
-## Instructions
+| File | Enables | Where to get it |
+| --- | --- | --- |
+| `live2dcubismcore.min.js` | Cubism 4 / 5 models (`*.model3.json`) | [Cubism SDK for Web](https://www.live2d.com/en/sdk/download/web/) → `Core/live2dcubismcore.min.js` |
+| `live2d.min.js` | Cubism 2 models (`model.json`, e.g. the classic Miku sample) | Cubism 2.1 SDK for WebGL → `lib/live2d.min.js` |
 
-1. Download the **Live2D Cubism SDK for Web** from the [official website](https://www.live2d.com/en/sdk/download/web/).
-2. Extract the downloaded archive.
-3. Locate `Core/live2dcubismcore.min.js`.
-4. Copy `live2dcubismcore.min.js` into this directory (`src/renderer/public/lib/`).
+Both files are git-ignored. After placing a file, restart `npm run dev` or reload the window.
 
-After placing the file, restart the development server or reload the application window.
+If a model needs a runtime that is missing, the app shows which file to add instead of a blank window.

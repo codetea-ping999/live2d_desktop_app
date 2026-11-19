@@ -10,8 +10,11 @@
   </head>
 
   <body>
-    <!-- Cubism SDK Core — place live2dcubismcore.min.js in src/renderer/lib/ -->
+    <!-- Live2D runtimes (not redistributable) — see src/renderer/public/lib/README.md.
+         Cubism 4/5 models need live2dcubismcore.min.js, Cubism 2 models need live2d.min.js.
+         A missing file only disables that model format. -->
     <script src="./lib/live2dcubismcore.min.js"></script>
+    <script src="./lib/live2d.min.js"></script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
