@@ -6,3 +6,5 @@ out
 *.log*
 live2dcubismcore.min.js
 live2d.min.js
+src/renderer/models/*
+!src/renderer/models/README.md

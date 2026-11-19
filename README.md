@@ -1,94 +1,126 @@
 # Live2D Desktop App
 
-A desktop mascot application for **Mac** that displays a Live2D character (e.g., Hatsune Miku) floating on your desktop with a transparent background.
+[![CI](https://github.com/codetea-ping999/live2d_desktop_app/actions/workflows/ci.yml/badge.svg)](https://github.com/codetea-ping999/live2d_desktop_app/actions/workflows/ci.yml)
+
+A desktop mascot for **macOS** (also runs on Windows / Linux) that shows a Live2D
+character in a transparent, always-on-top window. Models are stored locally, so
+the app works offline.
 
 ---
 
-## 🔰 Beginner's Guide & Overview
+## 🚀 Setup (first time only)
 
-This application uses **Electron** (which runs web technologies as a desktop app) and **PixiJS** (for rendering graphics).
+### 1. Node.js
 
-**How it works:**
-1. You run a command in the terminal to start the app.
-2. A window appears with the character.
-3. You can interact with the character (drag, resize, etc.).
-4. The background is transparent so it looks like the character is on your desktop wallpaper.
+Install **Node.js 22** (see `.nvmrc`). Check with `node -v`.
 
----
+### 2. Live2D runtime (required, not included)
 
-## 🚀 Setup (First Time Only)
+The Live2D runtime scripts cannot be redistributed, so add the one(s) for your
+models to `src/renderer/public/lib/`:
 
-### 1. Prerequisites
-Ensure you have **Node.js** installed on your Mac.
-- Check by running in Terminal: `node -v`
-- If not installed, download from [nodejs.org](https://nodejs.org/).
+| File                      | Needed for                                                   | Get it from                                                                 |
+| ------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| `live2dcubismcore.min.js` | Cubism 4 / 5 models (`*.model3.json`)                        | [Cubism SDK for Web](https://www.live2d.com/en/sdk/download/web/) → `Core/` |
+| `live2d.min.js`           | Cubism 2 models (`model.json`, e.g. the classic Miku sample) | Cubism 2.1 SDK for WebGL → `lib/`                                           |
 
-### 2. Download Live2D Cubism SDK (Required)
-The application needs a specific file from Live2D to work. This file cannot be distributed with the source code due to licensing, so you must add it manually.
+Details: [`src/renderer/public/lib/README.md`](src/renderer/public/lib/README.md).
 
-1. Go to the [Live2D Cubism SDK Download Page](https://www.live2d.com/en/sdk/download/web/).
-2. Accept the license agreement and download **Cubism SDK for Web**.
-3. Extract the downloaded zip file.
-4. Find the file: `Core/live2dcubismcore.min.js`.
-5. Copy this file into the project folder at:
-   `src/renderer/public/lib/live2dcubismcore.min.js`
-   *(If the folder `src/renderer/public/lib/` does not exist, create it first.)*
+### 3. Dependencies
 
-### 3. Install Project Dependencies
-Open your **Terminal**, navigate to this project folder, and run:
 ```bash
 npm install
 ```
-This downloads all the necessary libraries to run the app.
 
 ---
 
-## ▶️ How to Start (Development Mode)
+## ▶️ Run (development)
 
-To run the application while you are working on it or just want to test it:
+```bash
+npm run dev
+```
 
-1. Open **Terminal** in the project folder.
-2. Run the command:
-   ```bash
-   npm run dev
-   ```
-3. Wait a moment. The application window should appear on your desktop.
-
-**Note:** In development mode, you might see a "DevTools" window (code inspector) open alongside the character. You can close it if you don't need it.
+The first time, the library is empty: click **＋ Import model** and choose a
+model folder (or its `*.model3.json` / `model.json`).
 
 ---
 
-## 📦 How to Build (Create App File)
+## ✨ Controls
 
-To create a standalone application file (`.app`) that you can run without the Terminal:
+| Action                | How                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| Move the window       | Drag the character. A short click is a tap (plays a motion).                          |
+| Settings              | Hover the ⚙️ button (top-right).                                                      |
+| Size / transparency   | **Scale** and **Opacity** sliders.                                                    |
+| Switch model / import | **Model** selector and **＋ Import** in the settings panel.                           |
+| Always on top         | **📌 Pinned** button, or the tray menu.                                               |
+| Click-through         | **👻** button or tray menu. Clicks then go to the apps behind the character.          |
+| Leave click-through   | Hover the 👻 button and click it, press **⌘⇧L** (Ctrl+Shift+L), or use the tray menu. |
+| Quit                  | **✕ Close** button or tray menu → Quit.                                               |
 
-1. Run the build command:
-   ```bash
-   npm run build:mac
-   ```
-2. Once finished, look in the `dist/` or `dist/mac/` folder inside the project directory.
-3. You will find the application file (e.g., `Live2D Desktop App.app` or similar). You can double-click this to run it!
+Everything above (window position and size, scale, opacity, always-on-top,
+click-through, selected model) is restored on the next launch. If a monitor is
+disconnected, the window moves back onto a visible screen.
+
+### Where models live
+
+- **Imported models:** the app's data folder — `~/Library/Application Support/Live2D Desktop/models/` on macOS.
+  Import copies only the files the model references and checks that nothing is missing.
+- **Bundled models (optional):** folders in [`src/renderer/models/`](src/renderer/models/README.md) are shipped inside the app.
 
 ---
 
-## ✨ Controls & Features
+## 📦 Build the app
 
-- **Move Character**: Click and drag anywhere on the character to move it around your screen.
-- **Resize / Opacity**:
-  - Hover your mouse over the **top-right** area of the character.
-  - A control panel will appear. Use the sliders to change the size (Scale) or transparency (Opacity).
-- **System Tray**:
-  - Look for the app icon in your Mac's top menu bar (Tray).
-  - Click it to see options like **"Toggle Always on Top"** (keep character above everything) or **"Quit"** to close the app.
-- **Interaction**: The character's eyes will follow your mouse cursor.
+```bash
+npm run build:mac     # typecheck + bundle + dist/*.dmg (unsigned)
+```
+
+The app is written to `dist/` (e.g. `dist/mac-arm64/Live2D Desktop.app` and
+`dist/live2d-desktop-app-1.0.0-arm64.dmg`). Unsigned builds open with
+right-click → Open the first time. Signing and notarization:
+[`docs/macos-release.md`](docs/macos-release.md).
+
+Other platforms: `npm run build:win`, `npm run build:linux`.
+
+---
+
+## 🧪 Checks
+
+The same commands run in CI on every push and pull request:
+
+```bash
+npm run lint
+npm run typecheck
+npm test          # Vitest: no network, no Electron window, no real Live2D assets
+npm run build
+```
+
+---
+
+## 🧱 Architecture
+
+```text
+Electron main  ── DesktopController (window, tray, settings) · ModelLibrary · live2d-model:// protocol
+   │  typed IPC (validated payloads, trusted sender only)
+Preload (sandboxed) ── window.api
+   │
+React UI ── ControlOverlay · Live2DViewer
+   │
+CharacterRuntime ── Pixi + pixi-live2d-display + Cubism runtime
+```
+
+Security: the renderer runs with `sandbox: true`, sees only `window.api`, has
+a strict production CSP (no `unsafe-eval`, no remote origins), and can open
+only `https:` links externally.
 
 ---
 
 ## ❓ Troubleshooting
 
-- **"Module not found" error**:
-  Did you run `npm install`? Make sure all dependencies are installed.
-- **Blank white window**:
-  Did you copy the `live2dcubismcore.min.js` file correctly? See step 2 in Setup.
-- **Character not appearing**:
-  Check the Terminal for errors. If it says network error, check your internet connection (the model is loaded from the internet by default).
+- **"Live2D runtime not found" / "…live2d.min.js is not installed"** — add the
+  runtime file for your model's Cubism version (Setup step 2) and reload.
+- **Import says files are missing** — the model's JSON references files that
+  are not in the folder; the message lists them.
+- **Window disappeared** — use the tray menu → Show/Hide. If it is in
+  click-through mode, press ⌘⇧L.

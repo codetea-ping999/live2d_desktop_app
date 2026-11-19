@@ -2,32 +2,40 @@ appId: com.live2d.desktop
 productName: Live2D Desktop
 directories:
   buildResources: build
+  output: dist
 files:
   - '!**/.vscode/*'
   - '!src/*'
+  - '!test/*'
+  - '!docs/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!vitest.config.ts'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,.nvmrc,dev-app-update.yml,CHANGELOG.md,README.md,memo.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+# Read-only bundled models: every folder in src/renderer/models becomes
+# <resources>/models/<folder>, listed next to the user's library (#9, #14).
 extraResources:
   - from: src/renderer/models
     to: models
     filter:
       - '**/*'
+      - '!README.md'
 asarUnpack:
   - resources/**
 mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
   target: dmg
   category: public.app-category.entertainment
+  # Hardened runtime is required for notarization (see docs/macos-release.md).
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # The app asks for no camera / microphone / folder permissions: model
+  # import goes through the system file picker, which grants access itself.
+  # Signing / notarization credentials come from the environment only.
+  notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 win:
   executableName: live2d-desktop
 nsis:
@@ -38,13 +46,11 @@ nsis:
 linux:
   target:
     - AppImage
-    - snap
     - deb
-  maintainer: ''
+  maintainer: codetea-ping999
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
+# No auto-update server: nothing is published.
+publish: null
