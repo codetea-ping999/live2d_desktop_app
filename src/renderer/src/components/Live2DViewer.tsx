@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { bindWindowEvents, IDLE_STATUS, type CharacterRuntime } from '../live2d/CharacterRuntime'
 import { createPixiRuntime } from '../live2d/pixiRuntime'
+import { PointerGesture, type PointerPoint } from '../live2d/pointerGesture'
 import type { LoadResult, RuntimeStatus } from '../live2d/types'
 
 interface Live2DViewerProps {
@@ -8,8 +9,14 @@ interface Live2DViewerProps {
   modelUrl: string | null
   scale: number
   opacity: number
+  /** False in click-through mode: no drag / tap handling. */
+  interactive: boolean
   /** Called once per non-stale load, e.g. to roll back a failed selection. */
   onLoadResult?: (result: LoadResult) => void
+}
+
+function screenOf(p: PointerPoint): { screenX: number; screenY: number } {
+  return { screenX: p.screenX, screenY: p.screenY }
 }
 
 const noopSubscribe = (): (() => void) => () => undefined
@@ -19,11 +26,14 @@ function Live2DViewer({
   modelUrl,
   scale,
   opacity,
+  interactive,
   onLoadResult
 }: Live2DViewerProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const [runtime, setRuntime] = useState<CharacterRuntime | null>(null)
   const latest = useRef({ scale, opacity, onLoadResult })
+  const gesture = useRef(new PointerGesture())
+  const [dragging, setDragging] = useState(false)
 
   useEffect(() => {
     latest.current = { scale, opacity, onLoadResult }
@@ -73,8 +83,63 @@ function Live2DViewer({
 
   const hasModel = status.currentUrl !== null
 
+  // Drag on the character moves the window; a short click is a tap (#3).
+  const point = (e: React.PointerEvent): PointerPoint => ({
+    clientX: e.clientX,
+    clientY: e.clientY,
+    screenX: e.screenX,
+    screenY: e.screenY
+  })
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
+    if (!interactive || e.button !== 0 || !runtime) return
+    if (!runtime.containsPoint(e.clientX, e.clientY)) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    gesture.current.down(point(e))
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+    const event = gesture.current.move(point(e))
+    if (!event) return
+    if (event.type === 'drag-start') {
+      setDragging(true)
+      window.api.drag({ phase: 'start', ...screenOf(event.origin) })
+      window.api.drag({ phase: 'move', ...screenOf(event.current) })
+    } else if (event.type === 'drag-move') {
+      window.api.drag({ phase: 'move', ...screenOf(event.current) })
+    }
+  }
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>): void => {
+    const event = gesture.current.up(point(e))
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    if (event?.type === 'drag-end') {
+      setDragging(false)
+      window.api.drag({ phase: 'end', ...screenOf(event.current) })
+    } else if (event?.type === 'tap') {
+      runtime?.tap(event.at.clientX, event.at.clientY)
+    }
+  }
+
+  const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>): void => {
+    const event = gesture.current.cancel(point(e))
+    if (event?.type === 'drag-end') {
+      setDragging(false)
+      window.api.drag({ phase: 'end', ...screenOf(event.current) })
+    }
+  }
+
   return (
-    <div className="live2d-container" ref={containerRef}>
+    <div
+      className={`live2d-container ${dragging ? 'dragging' : ''}`}
+      ref={containerRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+    >
       {status.phase === 'loading' && !hasModel && (
         <div className="loading-overlay">
           <div className="loading-spinner" />

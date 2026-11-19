@@ -1,12 +1,27 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { IPC, type AppStateView, type DragMessage, type Live2DAPI } from '../shared/ipc'
 
 // Custom APIs for Live2D Desktop
-const live2dAPI = {
-  closeWindow: (): void => ipcRenderer.send('window:close'),
-  minimizeWindow: (): void => ipcRenderer.send('window:minimize'),
-  toggleAlwaysOnTop: (): Promise<boolean> => ipcRenderer.invoke('window:toggle-always-on-top'),
-  setIgnoreMouse: (ignore: boolean): void => ipcRenderer.send('window:set-ignore-mouse', ignore)
+const live2dAPI: Live2DAPI = {
+  getState: (): Promise<AppStateView> => ipcRenderer.invoke(IPC.getState),
+  onStateChanged: (listener: (state: AppStateView) => void): (() => void) => {
+    const wrapped = (_event: IpcRendererEvent, state: AppStateView): void => listener(state)
+    ipcRenderer.on(IPC.stateChanged, wrapped)
+    return () => {
+      ipcRenderer.removeListener(IPC.stateChanged, wrapped)
+    }
+  },
+  setAlwaysOnTop: (value: boolean): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.setAlwaysOnTop, value),
+  setClickThrough: (value: boolean): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.setClickThrough, value),
+  setPointerOverControls: (value: boolean): void =>
+    ipcRenderer.send(IPC.setPointerOverControls, value),
+  updateCharacter: (patch: { scale?: number; opacity?: number }): void =>
+    ipcRenderer.send(IPC.updateCharacter, patch),
+  drag: (message: DragMessage): void => ipcRenderer.send(IPC.drag, message),
+  quit: (): void => ipcRenderer.send(IPC.quit)
 }
 
 if (process.contextIsolated) {
