@@ -1,7 +1,9 @@
 import type { IpcMain, IpcMainEvent, IpcMainInvokeEvent } from 'electron'
 import { IPC, type DragMessage } from '../shared/ipc'
 import { parseCharacterPatch } from '../shared/settings'
+import { MODEL_ID_PATTERN } from '../shared/models'
 import type { DesktopController } from './desktopController'
+import type { ModelService } from './modelService'
 
 export function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean'
@@ -18,6 +20,7 @@ export function parseDragMessage(value: unknown): DragMessage | null {
 
 export interface IpcHandlerDeps {
   controller: DesktopController
+  models: Pick<ModelService, 'list' | 'select' | 'importFromDialog'>
   quit: () => void
   /** Reject messages that do not come from the app's own renderer. */
   isTrustedSender?: (event: IpcMainEvent | IpcMainInvokeEvent) => boolean
@@ -31,7 +34,7 @@ class IpcRejected extends Error {}
  * main process into an invalid state.
  */
 export function registerIpcHandlers(ipcMain: IpcMain, deps: IpcHandlerDeps): void {
-  const { controller, quit } = deps
+  const { controller, models, quit } = deps
   const trusted = deps.isTrustedSender ?? (() => true)
 
   const on = (channel: string, fn: (payload: unknown) => void): void => {
@@ -72,6 +75,17 @@ export function registerIpcHandlers(ipcMain: IpcMain, deps: IpcHandlerDeps): voi
     const message = parseDragMessage(value)
     if (message) controller.drag(message)
   })
+
+  handle(IPC.listModels, () => models.list())
+
+  handle(IPC.selectModel, (id) => {
+    if (typeof id !== 'string' || !MODEL_ID_PATTERN.test(id)) {
+      throw new IpcRejected('expected a model id')
+    }
+    return models.select(id)
+  })
+
+  handle(IPC.importModel, () => models.importFromDialog())
 
   on(IPC.quit, () => quit())
 }

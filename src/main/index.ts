@@ -1,21 +1,28 @@
 import {
   app,
   BrowserWindow,
+  dialog,
   globalShortcut,
   ipcMain,
   Menu,
   nativeImage,
+  net,
+  protocol,
   screen,
   shell,
   Tray
 } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { MIN_WINDOW_SIZE } from '../shared/settings'
 import { resolveWindowBounds } from '../shared/windowBounds'
 import { DesktopController } from './desktopController'
 import { registerIpcHandlers } from './ipcHandlers'
+import { ModelLibrary } from './modelLibrary'
+import { ModelService } from './modelService'
+import { MODEL_PROTOCOL } from '../shared/models'
 import { SettingsStore } from './settingsStore'
 
 /** Global escape hatch from click-through mode (#7). */
@@ -26,6 +33,49 @@ let tray: Tray | null = null
 let controller: DesktopController | null = null
 let store: SettingsStore | null = null
 let registeredShortcut: string | null = null
+
+// Local models are served through a custom scheme so the renderer can load
+// them with fetch / <img> (CORS-enabled for WebGL textures) without file://
+// access or any network (#9).
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: MODEL_PROTOCOL,
+    privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true }
+  }
+])
+
+function bundledModelsRoot(): string {
+  return app.isPackaged
+    ? join(process.resourcesPath, 'models')
+    : join(app.getAppPath(), 'src', 'renderer', 'models')
+}
+
+function registerModelProtocol(library: ModelLibrary): void {
+  protocol.handle(MODEL_PROTOCOL, async (request) => {
+    const file = library.resolveFileUrl(request.url)
+    if (!file) return new Response('Not found', { status: 404 })
+    const response = await net.fetch(pathToFileURL(file).toString())
+    const headers = new Headers(response.headers)
+    headers.set('Access-Control-Allow-Origin', '*')
+    headers.set('Cache-Control', 'no-cache')
+    return new Response(response.body, { status: response.status, headers })
+  })
+}
+
+async function pickModelPath(): Promise<string | null> {
+  const options: Electron.OpenDialogOptions = {
+    title: 'Import Live2D model',
+    buttonLabel: 'Import',
+    message: 'Choose a model folder or its *.model3.json / model.json file',
+    // macOS can offer folders and files in one panel; elsewhere pick a folder.
+    properties: process.platform === 'darwin' ? ['openFile', 'openDirectory'] : ['openDirectory'],
+    filters: [{ name: 'Live2D model', extensions: ['json'] }]
+  }
+  const result = mainWindow
+    ? await dialog.showOpenDialog(mainWindow, options)
+    : await dialog.showOpenDialog(options)
+  return result.canceled || result.filePaths.length === 0 ? null : result.filePaths[0]
+}
 
 function displaysForPlacement(): {
   displays: { id: number; workArea: Electron.Rectangle }[]
@@ -153,7 +203,14 @@ app.whenReady().then(() => {
   screen.on('display-removed', keepVisible)
   screen.on('display-metrics-changed', keepVisible)
 
-  registerIpcHandlers(ipcMain, { controller: ctl, quit: () => app.quit() })
+  const library = new ModelLibrary({
+    userRoot: join(app.getPath('userData'), 'models'),
+    bundledRoot: bundledModelsRoot()
+  })
+  registerModelProtocol(library)
+  const models = new ModelService(library, store, pickModelPath)
+
+  registerIpcHandlers(ipcMain, { controller: ctl, models, quit: () => app.quit() })
   createTray()
 })
 

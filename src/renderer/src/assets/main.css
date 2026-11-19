@@ -282,3 +282,59 @@ input[type='range']::-webkit-slider-thumb:hover {
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.75);
 }
+
+/* Model selector */
+.control-select {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 12px;
+}
+
+.control-select option {
+  color: #000;
+}
+
+.import-btn {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.control-notice {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #ffb4b4;
+  word-break: break-word;
+}
+
+/* Empty library */
+.empty-state {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 280px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(20, 20, 30, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  text-align: center;
+  -webkit-app-region: no-drag;
+}
+
+.empty-state .control-btn {
+  margin: 10px 0 6px;
+}
+
+.empty-hint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}

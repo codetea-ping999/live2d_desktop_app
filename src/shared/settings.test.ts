@@ -21,7 +21,7 @@ describe('sanitizeSettings', () => {
       window: { bounds: { x: 10, y: 20, width: 300, height: 400 }, alwaysOnTop: false },
       character: { scale: 0.4, opacity: 0.5 },
       behavior: { clickThrough: true },
-      model: { selectedId: 'miku-1' }
+      model: { selectedId: 'user:miku-1' }
     }
     expect(sanitizeSettings(raw)).toEqual(raw)
   })

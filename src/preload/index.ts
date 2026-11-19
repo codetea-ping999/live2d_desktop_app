@@ -21,7 +21,10 @@ const live2dAPI: Live2DAPI = {
   updateCharacter: (patch: { scale?: number; opacity?: number }): void =>
     ipcRenderer.send(IPC.updateCharacter, patch),
   drag: (message: DragMessage): void => ipcRenderer.send(IPC.drag, message),
-  quit: (): void => ipcRenderer.send(IPC.quit)
+  quit: (): void => ipcRenderer.send(IPC.quit),
+  listModels: () => ipcRenderer.invoke(IPC.listModels),
+  selectModel: (id: string) => ipcRenderer.invoke(IPC.selectModel, id),
+  importModel: () => ipcRenderer.invoke(IPC.importModel)
 }
 
 if (process.contextIsolated) {

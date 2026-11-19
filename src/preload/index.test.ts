@@ -23,8 +23,11 @@ describe('preload API contract', () => {
       [
         'drag',
         'getState',
+        'importModel',
+        'listModels',
         'onStateChanged',
         'quit',
+        'selectModel',
         'setAlwaysOnTop',
         'setClickThrough',
         'setPointerOverControls',

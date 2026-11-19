@@ -13,8 +13,18 @@ function setup(isTrustedSender?: () => boolean) {
   const store = new MemorySettings()
   const controller = new DesktopController(win, store)
   const quit = vi.fn()
-  registerIpcHandlers(electron.ipcMain as unknown as IpcMain, { controller, quit, isTrustedSender })
-  return { electron, win, store, quit, event: fakeIpcEvent() }
+  const models = {
+    list: vi.fn(async () => ({ models: [], selectedId: null })),
+    select: vi.fn(async () => ({ models: [], selectedId: null })),
+    importFromDialog: vi.fn(async () => ({ status: 'canceled' as const }))
+  }
+  registerIpcHandlers(electron.ipcMain as unknown as IpcMain, {
+    controller,
+    models,
+    quit,
+    isTrustedSender
+  })
+  return { electron, win, store, quit, models, event: fakeIpcEvent() }
 }
 
 describe('IPC handlers', () => {
@@ -57,6 +67,24 @@ describe('IPC handlers', () => {
     electron.emit(IPC.quit, event)
     expect(win.alwaysOnTop).toBe(true)
     expect(quit).not.toHaveBeenCalled()
+  })
+})
+
+describe('model IPC (#9–#11)', () => {
+  it('validates model ids before selecting', async () => {
+    const { electron, models, event } = setup()
+    await electron.invoke(IPC.selectModel, event, 'user:miku')
+    expect(models.select).toHaveBeenCalledWith('user:miku')
+    for (const bad of ['../../etc', 'miku', 42, null, 'user:../x']) {
+      await expect(electron.invoke(IPC.selectModel, event, bad)).rejects.toThrow()
+    }
+    expect(models.select).toHaveBeenCalledTimes(1)
+  })
+
+  it('import takes no payload from the renderer (main opens the picker)', async () => {
+    const { electron, models, event } = setup()
+    await electron.invoke(IPC.importModel, event, '/etc/passwd')
+    expect(models.importFromDialog).toHaveBeenCalledWith()
   })
 })
 
