@@ -1,42 +1,33 @@
+/**
+ * The only bridge between the renderer and Electron (#16).
+ *
+ * Runs with `sandbox: true`, so it may import nothing but 'electron' (shared
+ * modules are bundled in). The renderer gets a typed, fixed set of functions
+ * on `window.api`; it never sees ipcRenderer or any generic send/invoke.
+ */
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
-import { IPC, type AppStateView, type DragMessage, type Live2DAPI } from '../shared/ipc'
+import { IPC, type AppStateView, type Live2DAPI } from '../shared/ipc'
 
-// Custom APIs for Live2D Desktop
 const live2dAPI: Live2DAPI = {
-  getState: (): Promise<AppStateView> => ipcRenderer.invoke(IPC.getState),
-  onStateChanged: (listener: (state: AppStateView) => void): (() => void) => {
+  getState: () => ipcRenderer.invoke(IPC.getState),
+  onStateChanged: (listener) => {
     const wrapped = (_event: IpcRendererEvent, state: AppStateView): void => listener(state)
     ipcRenderer.on(IPC.stateChanged, wrapped)
     return () => {
       ipcRenderer.removeListener(IPC.stateChanged, wrapped)
     }
   },
-  setAlwaysOnTop: (value: boolean): Promise<boolean> =>
-    ipcRenderer.invoke(IPC.setAlwaysOnTop, value),
-  setClickThrough: (value: boolean): Promise<boolean> =>
-    ipcRenderer.invoke(IPC.setClickThrough, value),
-  setPointerOverControls: (value: boolean): void =>
-    ipcRenderer.send(IPC.setPointerOverControls, value),
-  updateCharacter: (patch: { scale?: number; opacity?: number }): void =>
-    ipcRenderer.send(IPC.updateCharacter, patch),
-  drag: (message: DragMessage): void => ipcRenderer.send(IPC.drag, message),
-  quit: (): void => ipcRenderer.send(IPC.quit),
+  setAlwaysOnTop: (value) => ipcRenderer.invoke(IPC.setAlwaysOnTop, value),
+  setClickThrough: (value) => ipcRenderer.invoke(IPC.setClickThrough, value),
+  setPointerOverControls: (value) => ipcRenderer.send(IPC.setPointerOverControls, value),
+  updateCharacter: (patch) => ipcRenderer.send(IPC.updateCharacter, patch),
+  drag: (message) => ipcRenderer.send(IPC.drag, message),
+  quit: () => ipcRenderer.send(IPC.quit),
   listModels: () => ipcRenderer.invoke(IPC.listModels),
-  selectModel: (id: string) => ipcRenderer.invoke(IPC.selectModel, id),
+  selectModel: (id) => ipcRenderer.invoke(IPC.selectModel, id),
   importModel: () => ipcRenderer.invoke(IPC.importModel)
 }
 
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', live2dAPI)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = live2dAPI
-}
+// contextIsolation is always on; there is deliberately no fallback that
+// would attach the API to a shared window object.
+contextBridge.exposeInMainWorld('api', Object.freeze(live2dAPI))

@@ -6,13 +6,19 @@ let electron: ElectronMock
 async function loadPreload(): Promise<Record<string, (...args: unknown[]) => unknown>> {
   vi.resetModules()
   vi.doMock('electron', () => electron.module)
-  vi.doMock('@electron-toolkit/preload', () => ({ electronAPI: { kind: 'toolkit' } }))
-  vi.stubGlobal('process', { ...process, contextIsolated: true })
   await import('./index')
   return electron.exposed.get('api') as Record<string, (...args: unknown[]) => unknown>
 }
 
 describe('preload API contract', () => {
+  it('exposes only window.api — no generic electron / ipcRenderer bridge (#16)', async () => {
+    await loadPreload()
+    expect([...electron.exposed.keys()]).toEqual(['api'])
+    const api = electron.exposed.get('api') as object
+    expect(Object.isFrozen(api)).toBe(true)
+    for (const fn of Object.values(api)) expect(typeof fn).toBe('function')
+  })
+
   beforeEach(() => {
     electron = createElectronMock()
   })

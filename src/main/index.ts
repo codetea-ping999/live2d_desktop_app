@@ -9,11 +9,13 @@ import {
   net,
   protocol,
   screen,
+  session,
   shell,
   Tray
 } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
+import { isAppUrl, isSafeExternalUrl, type AppOrigin } from './security'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { MIN_WINDOW_SIZE } from '../shared/settings'
@@ -77,6 +79,12 @@ async function pickModelPath(): Promise<string | null> {
   return result.canceled || result.filePaths.length === 0 ? null : result.filePaths[0]
 }
 
+const rendererIndex = join(__dirname, '../renderer/index.html')
+const appOrigin: AppOrigin = {
+  devServerUrl: is.dev ? (process.env['ELECTRON_RENDERER_URL'] ?? null) : null,
+  rendererFileUrl: pathToFileURL(rendererIndex).toString()
+}
+
 function displaysForPlacement(): {
   displays: { id: number; workArea: Electron.Rectangle }[]
   primary: { id: number; workArea: Electron.Rectangle }
@@ -102,9 +110,11 @@ function createWindow(settings: SettingsStore): BrowserWindow {
     backgroundColor: '#00000000',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
+      sandbox: true,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webSecurity: true,
+      spellcheck: false
     }
   })
 
@@ -113,15 +123,21 @@ function createWindow(settings: SettingsStore): BrowserWindow {
 
   win.on('ready-to-show', () => win.show())
 
+  // No new windows; https links open in the user's browser, nothing else.
   win.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (isSafeExternalUrl(details.url)) void shell.openExternal(details.url)
     return { action: 'deny' }
   })
+  // The renderer may never navigate away from the app page.
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!isAppUrl(url, appOrigin)) event.preventDefault()
+  })
+  win.webContents.on('will-attach-webview', (event) => event.preventDefault())
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  if (appOrigin.devServerUrl) {
+    win.loadURL(appOrigin.devServerUrl)
   } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(rendererIndex)
   }
   return win
 }
@@ -168,6 +184,12 @@ function createTray(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.live2d.desktop')
 
+  // The app needs no camera, microphone, notifications, geolocation, …
+  session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) =>
+    callback(false)
+  )
+  session.defaultSession.setPermissionCheckHandler(() => false)
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -210,7 +232,17 @@ app.whenReady().then(() => {
   registerModelProtocol(library)
   const models = new ModelService(library, store, pickModelPath)
 
-  registerIpcHandlers(ipcMain, { controller: ctl, models, quit: () => app.quit() })
+  registerIpcHandlers(ipcMain, {
+    controller: ctl,
+    models,
+    quit: () => app.quit(),
+    // Only our own window's main frame, showing our own page, may call IPC.
+    isTrustedSender: (event) =>
+      event.sender === win.webContents &&
+      event.senderFrame !== null &&
+      event.senderFrame === win.webContents.mainFrame &&
+      isAppUrl(event.senderFrame.url, appOrigin)
+  })
   createTray()
 })
 

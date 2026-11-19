@@ -1,4 +1,6 @@
 import * as PIXI from 'pixi.js'
+// Precompiled shader sync functions, so production CSP needs no 'unsafe-eval' (#16).
+import '@pixi/unsafe-eval'
 import type { Live2DModel as Live2DModelType } from 'pixi-live2d-display'
 import { CharacterRuntime } from './CharacterRuntime'
 import type { CharacterModel, CharacterStage } from './types'
