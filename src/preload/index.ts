@@ -6,8 +6,7 @@ const live2dAPI = {
   closeWindow: (): void => ipcRenderer.send('window:close'),
   minimizeWindow: (): void => ipcRenderer.send('window:minimize'),
   toggleAlwaysOnTop: (): Promise<boolean> => ipcRenderer.invoke('window:toggle-always-on-top'),
-  setIgnoreMouse: (ignore: boolean): void =>
-    ipcRenderer.send('window:set-ignore-mouse', ignore)
+  setIgnoreMouse: (ignore: boolean): void => ipcRenderer.send('window:set-ignore-mouse', ignore)
 }
 
 if (process.contextIsolated) {
